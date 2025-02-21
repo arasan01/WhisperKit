@@ -6,7 +6,7 @@ import AVFAudio
 import CoreML
 import Hub
 import NaturalLanguage
-import Tokenizers
+public import Tokenizers
 
 #if !((os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64))
 public typealias FloatType = Float16
@@ -1205,12 +1205,13 @@ public protocol WhisperTokenizer: Tokenizer {
     func splitToWordTokens(tokenIds: [Int]) -> (words: [String], wordTokens: [[Int]])
 }
 
-struct WhisperTokenizerWrapper: WhisperTokenizer {
-    let tokenizer: any Tokenizer
-    let specialTokens: SpecialTokens
-    let allLanguageTokens: Set<Int>
+public struct WhisperTokenizerWrapper: WhisperTokenizer {
 
-    init(tokenizer: any Tokenizer) {
+    public let tokenizer: any Tokenizer
+    public let specialTokens: SpecialTokens
+    public let allLanguageTokens: Set<Int>
+
+    public init(tokenizer: any Tokenizer) {
         let specialTokens = SpecialTokens(
             endToken: tokenizer.convertTokenToId("<|endoftext|>") ?? Self.defaultEndToken,
             englishToken: tokenizer.convertTokenToId("<|en|>") ?? Self.defaultEnglishToken,
@@ -1300,7 +1301,7 @@ struct WhisperTokenizerWrapper: WhisperTokenizer {
     /// Decodes token ids into individual words and per-word subtokens
     /// - Parameter tokenIds: Array of tokens to decode and then split
     /// - Returns: Tuple containing and array of the split words and all tokens for each word
-    func splitToWordTokens(tokenIds: [Int]) -> (words: [String], wordTokens: [[Int]]) {
+    public func splitToWordTokens(tokenIds: [Int]) -> (words: [String], wordTokens: [[Int]]) {
         let decodedWords = tokenizer.decode(tokens: tokenIds.filter { $0 < specialTokens.specialTokenBegin })
 
         // Detect language of input text
@@ -1314,26 +1315,20 @@ struct WhisperTokenizerWrapper: WhisperTokenizer {
             return splitTokensOnSpaces(tokens: tokenIds)
         }
     }
-}
 
-extension WhisperTokenizerWrapper: Tokenizer {
-    func encode(text: String, addSpecialTokens: Bool) -> [Int] {
-        tokenizer.encode(text: text, addSpecialTokens: addSpecialTokens)
-    }
-
-    func applyChatTemplate(messages: [[String : String]]) throws -> [Int] {
+    public func applyChatTemplate(messages: [[String : String]]) throws -> [Int] {
         try tokenizer.applyChatTemplate(messages: messages)
     }
 
-    func applyChatTemplate(messages: [[String : String]], chatTemplate: Tokenizers.ChatTemplateArgument) throws -> [Int] {
+    public func applyChatTemplate(messages: [[String : String]], chatTemplate: Tokenizers.ChatTemplateArgument) throws -> [Int] {
         try tokenizer.applyChatTemplate(messages: messages, chatTemplate: chatTemplate)
     }
 
-    func applyChatTemplate(messages: [[String : String]], chatTemplate: String) throws -> [Int] {
+    public func applyChatTemplate(messages: [[String : String]], chatTemplate: String) throws -> [Int] {
         try tokenizer.applyChatTemplate(messages: messages, chatTemplate: chatTemplate)
     }
 
-    func applyChatTemplate(
+    public func applyChatTemplate(
       messages: [[String : String]],
       chatTemplate: Tokenizers.ChatTemplateArgument?,
       addGenerationPrompt: Bool,
@@ -1351,64 +1346,68 @@ extension WhisperTokenizerWrapper: Tokenizer {
         )
     }
 
-    func tokenize(text: String) -> [String] {
+    public func tokenize(text: String) -> [String] {
         tokenizer.tokenize(text: text)
     }
 
-    func encode(text: String) -> [Int] {
+    public func encode(text: String) -> [Int] {
         tokenizer.encode(text: text)
     }
-
-    func decode(tokens: [Int]) -> String {
-        tokenizer.decode(tokens: tokens)
+  
+    public func encode(text: String, addSpecialTokens: Bool) -> [Int] {
+      tokenizer.encode(text: text, addSpecialTokens: addSpecialTokens)
+    }
+  
+    public func decode(tokens: [Int], skipSpecialTokens: Bool) -> String {
+        tokenizer.decode(tokens: tokens, skipSpecialTokens: skipSpecialTokens)
     }
 
-    func convertTokenToId(_ token: String) -> Int? {
+    public func convertTokenToId(_ token: String) -> Int? {
         tokenizer.convertTokenToId(token)
     }
 
-    func convertIdToToken(_ id: Int) -> String? {
+    public func convertIdToToken(_ id: Int) -> String? {
         tokenizer.convertIdToToken(id)
     }
 
-    var bosToken: String? {
+    public var bosToken: String? {
         tokenizer.bosToken
     }
 
-    var bosTokenId: Int? {
+    public var bosTokenId: Int? {
         tokenizer.bosTokenId
     }
 
-    var eosToken: String? {
+    public var eosToken: String? {
         tokenizer.eosToken
     }
 
-    var eosTokenId: Int? {
+    public var eosTokenId: Int? {
         tokenizer.eosTokenId
     }
 
-    var unknownToken: String? {
+    public var unknownToken: String? {
         tokenizer.unknownToken
     }
 
-    var unknownTokenId: Int? {
+    public var unknownTokenId: Int? {
         tokenizer.unknownTokenId
     }
 }
 
 extension WhisperTokenizerWrapper {
     /// Default values for each token, using base vocab
-    static var defaultWhitespaceToken: Int { 220 }
-    static var defaultSpecialTokenBegin: Int { 50257 }
-    static var defaultEndToken: Int { 50257 }
-    static var defaultStartOfPreviousToken: Int { 50361 }
-    static var defaultStartOfTranscriptToken: Int { 50258 }
-    static var defaultEnglishToken: Int { 50259 }
-    static var defaultTranscribeToken: Int { 50359 }
-    static var defaultTranslateToken: Int { 50358 }
-    static var defaultNoSpeechToken: Int { 50362 }
-    static var defaultNoTimestampsToken: Int { 50363 }
-    static var defaultTimeTokenBegin: Int { 50364 }
+    public static var defaultWhitespaceToken: Int { 220 }
+    public static var defaultSpecialTokenBegin: Int { 50257 }
+    public static var defaultEndToken: Int { 50257 }
+    public static var defaultStartOfPreviousToken: Int { 50361 }
+    public static var defaultStartOfTranscriptToken: Int { 50258 }
+    public static var defaultEnglishToken: Int { 50259 }
+    public static var defaultTranscribeToken: Int { 50359 }
+    public static var defaultTranslateToken: Int { 50358 }
+    public static var defaultNoSpeechToken: Int { 50362 }
+    public static var defaultNoTimestampsToken: Int { 50363 }
+    public static var defaultTimeTokenBegin: Int { 50364 }
 }
 
 // MARK: Constants
